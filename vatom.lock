@@ -1,0 +1,15 @@
+{
+  "id": "com.vatom.emojiswap",
+  "name": "Emoji Swap Game",
+  "version": "1.0.0",
+  "beta": true,
+  "pluginType": "Personal",
+  "description": "Allow users to play a game where they can swap and collect emojis.",
+  "longDescription": ".",
+  "configuration": ".",
+  "category": "Fun",
+  "businessId": ".",
+  "price": 0,
+  "releaseNotes": ".",
+  "entrypoint": ""
+}
