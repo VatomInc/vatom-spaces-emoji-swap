@@ -1,4 +1,5 @@
 import { BasePlugin, BaseComponent } from 'vatom-spaces-plugins'
+import { BridgeAction, StateBridge } from './StateBridge'
 
 /**
  * This is the main entry point for your plugin.
@@ -16,12 +17,12 @@ export default class PhotoBoothPlugin extends BasePlugin {
     static name = "Emoji Swap Game"
 
     /** Called on load */
-    onLoad() {
+    async onLoad() {
 
         // Register menu button
         this.menus.register({
             section: 'controls',
-            icon: this.paths.absolute('icon-button2.svg'),
+            icon: this.paths.absolute('icon-button.svg'),
             text: 'Emoji Swap',
             panel: {
                 inAccordion: true,
@@ -30,6 +31,34 @@ export default class PhotoBoothPlugin extends BasePlugin {
             }
         })
 
+        // Set emoji list
+        StateBridge.shared.state.emojis = [
+            '😀', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😋', '😛', '😝', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👹', '👺', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'
+        ]
+
+        // Set emoji score
+        StateBridge.shared.state.score = 0
+
+        // Set current user's emoji, based on their user ID
+        let userID = await this.user.getID()
+        var index = 0
+        for (let i = 0 ; i < userID.length ; i++) index += userID.charCodeAt(i)
+        index = index % StateBridge.shared.state.emojis.length
+        StateBridge.shared.state.myEmoji = StateBridge.shared.state.emojis[index]
+
+        // Set collected emojis. User has already collected their own emoji.
+        StateBridge.shared.state.collectedEmojis = {
+            [StateBridge.shared.state.myEmoji]: {
+                userID,
+                name: await this.user.getDisplayName(),
+            }
+        }
+
     }
+
+    /** (bridged) Show an alert dialog */
+    showAlert = StateBridge.shared.register('showAlert', async (msg, title, icon) => {
+        await this.menus.alert(msg, title, icon)
+    })
 
 }

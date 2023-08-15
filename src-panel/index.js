@@ -1,7 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { MyEmojis } from './routes/MyEmojis'
-import { HashRouter, Route, RouterProvider, Routes, createHashRouter } from 'react-router-dom'
+import { HashRouter, Route, Routes } from 'react-router-dom'
+import { Leaderboard } from './routes/Leaderboard'
 
 /** Main app */
 const App = () => {
@@ -12,6 +13,7 @@ const App = () => {
         {/* App routes */}
         <Routes>
             <Route path='/my-emojis' element={<MyEmojis />} />
+            <Route path='/leaderboard' element={<Leaderboard />} />
         </Routes>
     
     </HashRouter>
