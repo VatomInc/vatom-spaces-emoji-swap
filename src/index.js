@@ -1,6 +1,11 @@
 import { BasePlugin, BaseComponent } from 'vatom-spaces-plugins'
 import { BridgeAction, StateBridge } from './StateBridge'
 
+/** Standard emoji list */
+const StandardEmojiList = [
+    '😀', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😋', '😛', '😝', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👹', '👺', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'
+]
+
 /**
  * This is the main entry point for your plugin.
  *
@@ -31,10 +36,38 @@ export default class PhotoBoothPlugin extends BasePlugin {
             }
         })
 
-        // Set emoji list
-        StateBridge.shared.state.emojis = [
-            '😀', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😋', '😛', '😝', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👹', '👺', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'
-        ]
+        // Register settings
+        this.menus.register({
+            section: 'plugin-settings',
+            panel: {
+                fields: [
+                    { id: 'info1', type: 'label', value: `The Emoji Swap game lets you swap and collect emojis with other users in the space.` },
+                    { id: 'emoji_list', name: 'Emojis', type: 'textarea', help: `The list of emojis to use in the game. Separate each emoji with a space or newline.` },
+                ]
+            }
+        })
+
+        // Register Swap Emoji button
+        
+        // Update state
+        await this.updateState()
+
+    }
+
+    /** Called when settings change */
+    async onSettingsUpdated() {
+
+        // Update state
+        await this.updateState()
+
+    }
+
+    /** Update app state */
+    async updateState() {
+
+        // If the admin has customized the emoji list, use that instead, otherwise use the standard list
+        let customEmojis = (this.getField('emoji_list') || '').split(/[\s\n]+/).filter(s => s.length > 0 && s.length < 4)
+        StateBridge.shared.state.emojis = customEmojis.length > 0 ? customEmojis : StandardEmojiList
 
         // Set emoji score
         StateBridge.shared.state.score = 0
@@ -47,12 +80,10 @@ export default class PhotoBoothPlugin extends BasePlugin {
         StateBridge.shared.state.myEmoji = StateBridge.shared.state.emojis[index]
 
         // Set collected emojis. User has already collected their own emoji.
-        StateBridge.shared.state.collectedEmojis = {
-            [StateBridge.shared.state.myEmoji]: {
-                userID,
-                name: await this.user.getDisplayName(),
-            }
-        }
+        StateBridge.shared.state.collectedEmojis = StateBridge.shared.state.collectedEmojis || []
+
+        // Notify state updated
+        StateBridge.shared.updateState()
 
     }
 

@@ -91,6 +91,18 @@ export class StateBridge extends EventTarget {
             window.parent.postMessage(msg, "*")
     }
 
+    /** Update state */
+    updateState(state) {
+
+        // If fields exist, update state
+        if (state)
+            this.state = { ...this.state, ...state }
+
+        // Send state
+        this.postMessage({ action: "statebridge:state", state: this.state })
+
+    }
+
     /** Called when a message is received */
     async onMessage(event) {
 

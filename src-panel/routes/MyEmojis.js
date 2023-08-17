@@ -12,6 +12,18 @@ export const MyEmojis = props => {
     // Use navigate
     const navigate = useNavigate()
 
+    // Sort collected emojis by date, earliest first
+    let collectedEmojis = plugin.state.collectedEmojis || []
+    collectedEmojis.sort((a, b) => a.date - b.date)
+
+    // On first run, show help alert
+    React.useEffect(() => {
+
+        // Stop if help already shown
+        if (localStorage.getItem('emojiswap.help_shown')) return
+
+    }, [])
+
     // Render UI
     return <>
 
@@ -51,12 +63,13 @@ export const MyEmojis = props => {
 
             {/* Each emoji */}
             {plugin.state.emojis?.map((emoji, i) => 
-                <EmojiIcon key={i} emoji={emoji} collected={plugin.state.collectedEmojis[emoji]} onClick={() => {
+                <EmojiIcon key={i} emoji={emoji} collected={emoji == plugin.state.myEmoji || collectedEmojis.find(e => e.emoji == emoji)} onClick={() => {
 
                     // Get info text
+                    let collectedEmoji = collectedEmojis.find(e => e.emoji == emoji)
                     let txt = ''
                     if (emoji == plugin.state.myEmoji) txt = 'This is your own assigned emoji. Share it with others to increase your score! <br/><br/>You can share it with others by clicking on them in-world and then selecting Swap Emoji.'
-                    else if (plugin.state.collectedEmojis[emoji]) txt = 'You have collected this emoji from <b>' + plugin.state.collectedEmojis[emoji].name + '</b>.'
+                    else if (collectedEmoji) txt = 'You have collected this emoji from <b>' + collectedEmoji.username + '</b>.'
                     else txt = 'To collect this emoji, find the person who has it and then click on them to Swap Emojis.'
 
                     // Show alert
