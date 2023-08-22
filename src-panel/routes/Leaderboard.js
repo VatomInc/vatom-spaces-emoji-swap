@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useStateBridge } from '../components/Hooks'
 import { useNavigate } from 'react-router-dom'
 import { TabBar, TabBarItem } from '../components/SharedUI'
@@ -11,6 +11,11 @@ export const Leaderboard = props => {
 
     // Use navigate
     const navigate = useNavigate()
+
+    // Ask the plugin to update the leaderboard whenever we are shown
+    useEffect(() => {
+        plugin.remoteActions.fetchLeaderboard()
+    }, [])
 
     // Render UI
     return <>
@@ -25,28 +30,26 @@ export const Leaderboard = props => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, margin: '20px 0px' }}>
 
             {/* Second place */}
-            <LeaderboardTopIcon icon='🥈' size={60} image='' points={2} />
+            <LeaderboardTopIcon icon='🥈' size={60} image={plugin.state.leaderboard?.[1]?.picture} points={plugin.state.leaderboard?.[1]?.points || '-'} />
 
             {/* First place */}
-            <LeaderboardTopIcon icon='🏆' size={100} image='' points={1} />
+            <LeaderboardTopIcon icon='🏆' size={100} image={plugin.state.leaderboard?.[0]?.picture} points={plugin.state.leaderboard?.[0]?.points || '-'} />
 
             {/* Third place */}
-            <LeaderboardTopIcon icon='🥉' size={60} image='' points={3} />
+            <LeaderboardTopIcon icon='🥉' size={60} image={plugin.state.leaderboard?.[2]?.picture} points={plugin.state.leaderboard?.[2]?.points || '-'} />
 
         </div>
 
         {/* Leaderboard items */}
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-        <LeaderboardItemRow title="Test User" subtitle="@testuser" extra="12 pts" />
-    
+        {plugin.state.leaderboard?.map(user =>
+            <LeaderboardItemRow title={user.name} subtitle={`@${user.username}`} extra={`${user.points} pts`} image={user.picture} />
+        )}
+        
+        {/* Warning if no users found */}
+        { !plugin.state.leaderboard?.length ?
+            <div style={{ margin: 50, color: '#707278', fontSize: 13, textAlign: 'center' }}>Leaderboard is empty! Swap some emojis with nearby users to get started.</div>
+        : null }
+
     </>
 
 }

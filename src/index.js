@@ -72,11 +72,13 @@ export default class PhotoBoothPlugin extends BasePlugin {
             myEmoji: '',
             collectedEmojis: [],
             score: 0,
+            leaderboard: []
         }
         
         // Update state
         this.fetchEmojis()
         this.fetchScore()
+        this.fetchLeaderboard()
 
     }
 
@@ -86,6 +88,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
         // Update state
         this.fetchEmojis()
         this.fetchScore()
+        this.fetchLeaderboard()
 
     }
 
@@ -104,7 +107,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
         StateBridge.shared.state.myEmoji = StateBridge.shared.state.emojis[index]
 
         // Get collected emojis
-        let collectedEmojis = await this.user.getProperty(null, 'collected_emojis')
+        let collectedEmojis = await this.user.getProperty(null, 'space:collected_emojis')
         if (collectedEmojis && Array.isArray(collectedEmojis))
             StateBridge.shared.state.collectedEmojis = collectedEmojis
 
@@ -142,6 +145,54 @@ export default class PhotoBoothPlugin extends BasePlugin {
         StateBridge.shared.updateState()
 
     }
+
+    /** (bridged) Fetch the leaderboard */
+    fetchLeaderboard = StateBridge.shared.register('fetchLeaderboard', async () => {
+
+        // Catch errors
+        try {
+            
+            // Get fields
+            let campaignID = this.getField('campaign_id')
+            let channel = this.getField('points_channel') || 'emojiswap'
+            if (!campaignID) 
+                throw new Error("No Campaign ID set in the plugin settings.")
+
+            // Send request
+            let response = await this.hooks.trigger('vatoms.campaigns.points.leaderboard', { campaignID, channel, limit: 10 })
+            if (!response?.items)
+                throw new Error("No items returned from leaderboard request.")
+
+            // Fetch all user info
+            let leaderboard = []
+            await Promise.allSettled(response.items.map(item => (async () => {
+
+                // Fetch user information
+                let user = await fetch(`https://users.vatom.com/${item.id}`).then(r => r.json())
+
+                // Store user info
+                leaderboard.push({
+                    userID: item.id,
+                    points: item.points,
+                    username: user.preferred_username || item.id,
+                    name: user.name || `Guest (${item.id})`,
+                    picture: user.picture,
+                })
+
+            })()))
+
+            // Sort by points descending
+            leaderboard.sort((a, b) => b.points - a.points)
+
+            // Done!
+            StateBridge.shared.state.leaderboard = leaderboard
+            StateBridge.shared.updateState()
+
+        } catch (err) {
+            console.warn(`[Emoji Swap] Failed to get leaderboard: ${err.message}`)
+        }
+
+    })
 
     /** (bridged) Show an alert dialog */
     showAlert = StateBridge.shared.register('showAlert', async (msg, title, icon) => {
@@ -270,16 +321,14 @@ export default class PhotoBoothPlugin extends BasePlugin {
     async onEmojiCollected(emoji, fromID, fromName) {
 
         // Check if we already have an emoji from this user
+        let isNewEmoji = !StateBridge.shared.state.collectedEmojis.find(e => e.emoji == emoji)
+        let addScore = isNewEmoji ? 10 : 1
         if (StateBridge.shared.state.collectedEmojis.find(e => e.fromID == fromID)) 
             return
 
-        // Add emoji to our list
+        // Add emoji to our list and update the score
         StateBridge.shared.state.collectedEmojis.push({ emoji, fromID, fromName })
-
-        // Update score
-        StateBridge.shared.state.score += 1
-
-        // Notify state updated
+        StateBridge.shared.state.score += addScore
         StateBridge.shared.updateState()
 
         // Show toast
@@ -296,12 +345,9 @@ export default class PhotoBoothPlugin extends BasePlugin {
                 throw new Error("No campaign ID specified in the plugin settings.")
 
             // Send score update
-            let response = await this.hooks.trigger('vatoms.campaigns.points.add', { campaignID, channel, points: 1 })
+            let response = await this.hooks.trigger('vatoms.campaigns.points.add', { campaignID, channel, points: addScore })
             if (!response)
                 throw new Error("Failed to update score, is the Vatom plugin installed?")
-
-            // Fix score in case it changes
-            this.fetchScore()
 
         } catch (err) {
 
@@ -310,14 +356,17 @@ export default class PhotoBoothPlugin extends BasePlugin {
             this.menus.alert(err.message, "Unable to update score", 'error')
 
             // Undo the score update
-            StateBridge.shared.state.score -= 1
+            StateBridge.shared.state.score -= addScore
             StateBridge.shared.state.collectedEmojis = StateBridge.shared.state.collectedEmojis.filter(e => e.fromID != fromID)
             StateBridge.shared.updateState()
 
         }
 
         // Update saved emojis
-        await this.user.setProperties({ collected_emojis: StateBridge.shared.state.collectedEmojis })
+        await this.user.setProperties({ 'space:collected_emojis': StateBridge.shared.state.collectedEmojis })
+
+        // Fix score in case it changes
+        this.fetchScore()
 
     }
 

@@ -74,10 +74,10 @@ export const MyEmojis = props => {
                 <EmojiIcon key={i} emoji={emoji} collected={emoji == plugin.state.myEmoji || collectedEmojis.find(e => e.emoji == emoji)} onClick={() => {
 
                     // Get info text
-                    let collectedEmoji = collectedEmojis.find(e => e.emoji == emoji)
+                    let emojis = collectedEmojis.filter(e => e.emoji == emoji)
                     let txt = ''
-                    if (emoji == plugin.state.myEmoji) txt = 'This is your own assigned emoji. Share it with others to increase your score! <br/><br/>You can share it with others by clicking on them in-world and then selecting Swap Emoji.'
-                    else if (collectedEmoji) txt = 'You have collected this emoji from <b>' + collectedEmoji.fromName + '</b>.'
+                    if (emojis.length) txt = 'You have collected this emoji from <b>' + emojis.map(e => e.fromName).join(', ') + '</b>.'
+                    else if (emoji == plugin.state.myEmoji) txt = 'This is your own assigned emoji. Share it with others to increase your score! <br/><br/>You can share it with others by clicking on them in-world and then selecting Swap Emoji.'
                     else txt = 'To collect this emoji, find the person who has it and then click on them to Swap Emojis.'
 
                     // Show alert

@@ -16,9 +16,15 @@ npm run sideload <your-space-name>
 
 ### 2. Configure a Campaign
 
-Go to Studio and create a new Campaign that will be used for collecting user scores. Once you have the campaign ID, open the Emoji Swap plugin settings and enter the ID there.
+Go to [Studio](https://studio.vatom.com) and create a new Campaign that will be used for collecting user scores. Once you have the campaign ID, open the Emoji Swap plugin settings and enter the ID there.
 
 You can also configure which emojis appear in the game here as well.
+
+### 3. Play the game
+
+To play the game, click on other users in the space and select Swap Emoji. You get 10 points if you get a new emoji, and 1 point if you get one you already have.
+
+To view your collected emojis and see the leaderboard, press the Emoji Swap button at the bottom.
 
 ## Development
 
