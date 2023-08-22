@@ -16,11 +16,19 @@ export const MyEmojis = props => {
     let collectedEmojis = plugin.state.collectedEmojis || []
     collectedEmojis.sort((a, b) => a.date - b.date)
 
+    // Filter out duplicates in the emoji list
+    let allEmojis = plugin.state.emojis || []
+    allEmojis = allEmojis.filter((e, i) => allEmojis.indexOf(e) == i)
+
     // On first run, show help alert
     React.useEffect(() => {
 
         // Stop if help already shown
-        if (localStorage.getItem('emojiswap.help_shown')) return
+        if (localStorage['emojiswap.help_shown']) return
+        localStorage['emojiswap.help_shown'] = '1'
+
+        // Show help
+        plugin.remoteActions.showAlert(`<div style='font-size: 80px; padding-bottom: 20px; '>👋</div><div>Welcome to Emoji Swap! <br/><br/>This page shows the emojis you've collected so far. You can collect emojis from other people by clicking on them in-world and then selecting Swap Emoji.</div>`, 'Emoji Swap', 'none')
 
     }, [])
 
@@ -59,17 +67,17 @@ export const MyEmojis = props => {
         <div style={{ margin: 6, textAlign: 'center', fontSize: 17, fontWeight: 700, color: '#34C759' }}>{plugin.state.score ?? '-'} pts</div>
 
         {/* Emoji container */}
-        <div style={{ margin: 6, textAlign: 'center' }}>
+        <div style={{ margin: '20px 6px 10px 6px', textAlign: 'center' }}>
 
             {/* Each emoji */}
-            {plugin.state.emojis?.map((emoji, i) => 
+            {allEmojis.map((emoji, i) => 
                 <EmojiIcon key={i} emoji={emoji} collected={emoji == plugin.state.myEmoji || collectedEmojis.find(e => e.emoji == emoji)} onClick={() => {
 
                     // Get info text
                     let collectedEmoji = collectedEmojis.find(e => e.emoji == emoji)
                     let txt = ''
                     if (emoji == plugin.state.myEmoji) txt = 'This is your own assigned emoji. Share it with others to increase your score! <br/><br/>You can share it with others by clicking on them in-world and then selecting Swap Emoji.'
-                    else if (collectedEmoji) txt = 'You have collected this emoji from <b>' + collectedEmoji.username + '</b>.'
+                    else if (collectedEmoji) txt = 'You have collected this emoji from <b>' + collectedEmoji.fromName + '</b>.'
                     else txt = 'To collect this emoji, find the person who has it and then click on them to Swap Emojis.'
 
                     // Show alert

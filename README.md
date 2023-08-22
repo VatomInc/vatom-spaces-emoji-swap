@@ -2,6 +2,24 @@
 
 This [Vatom Spaces](https://vatom.com) plugin enables a game within your space where users can swap and collect emojis.
 
+## Setup
+
+### 1. Install the plugin
+
+You can install the plugin from the Marketplace (once it's published), or by cloning this repo and running:
+
+```bash
+npm install
+npm run login
+npm run sideload <your-space-name>
+```
+
+### 2. Configure a Campaign
+
+Go to Studio and create a new Campaign that will be used for collecting user scores. Once you have the campaign ID, open the Emoji Swap plugin settings and enter the ID there.
+
+You can also configure which emojis appear in the game here as well.
+
 ## Development
 
 - Ensure you have [Node](https://nodejs.org) installed

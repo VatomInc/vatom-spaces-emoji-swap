@@ -58,6 +58,9 @@ export const useStateBridge = () => {
     // Listen for changes
     useEffect(() => {
 
+        // Update once now, in case we've missed the update
+        setNonce(n => n + 1)
+
         // Create listener
         const listener = () => setNonce(n => n + 1)
 

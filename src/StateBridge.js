@@ -58,6 +58,7 @@ export class StateBridge extends EventTarget {
     startPluginSide() {
 
         // We are on the Plugin side, wrap the onMessage function
+        this.log(`Starting plugin side`)
         let originalOnMessage = plugin.onMessage
         plugin.onMessage = (event, fromID) => {
 
@@ -75,6 +76,7 @@ export class StateBridge extends EventTarget {
     startUISide() {
 
         // We are on the UI side, listen for messages
+        this.log(`Starting UI side`)
         window.addEventListener("message", this.onMessage.bind(this))
 
         // Request initial state from the plugin side
