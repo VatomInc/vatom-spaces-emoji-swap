@@ -204,7 +204,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
 
         // Show toast
         if (this.lastToastID) this.menus.closeToast(this.lastToastID)
-        this.lastToastID = await this.menus.toast({ text: 'Swap request sent...' })
+        this.lastToastID = await this.menus.toast({ text: 'Swap request sent...', duration: 5000 })
 
         // Send an alert to the other side
         let fromID = await this.user.getID()
@@ -226,7 +226,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
 
             // Swap request rejected, notify the user
             if (this.lastToastID) this.menus.closeToast(this.lastToastID)
-            this.lastToastID = await this.menus.toast({ text: msg.owned ? `<b>${msg.fromName}</b> has already received an emoji from you.` : `<b>${msg.fromName}</b> rejected your emoji swap.` })
+            this.lastToastID = await this.menus.toast({ text: msg.owned ? `<b>${msg.fromName}</b> has already received an emoji from you.` : `<b>${msg.fromName}</b> rejected your emoji swap.`, duration: 5000 })
 
         } else if (msg.action == 'emojiswap:accept-swap') {
 
@@ -270,6 +270,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
             buttonAction: () => promiseResolve(true),
             buttonCancelText: 'Reject',
             buttonCancelAction: () => promiseResolve(false),
+            isSticky: true,
         })
 
         // Wait for toast to be completed
@@ -333,7 +334,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
 
         // Show toast
         if (this.lastToastID) this.menus.closeToast(this.lastToastID)
-        this.lastToastID = await this.menus.toast({ text: `You collected ${emoji} from <b>${fromName}</b>!` })
+        this.lastToastID = await this.menus.toast({ text: `You collected ${emoji} from <b>${fromName}</b>!`, duration: 5000 })
 
         // Send updated score to Vatom
         try {
