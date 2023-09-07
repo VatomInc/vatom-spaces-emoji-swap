@@ -231,7 +231,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
         } else if (msg.action == 'emojiswap:accept-swap') {
 
             // Notify we collected their emoji
-            this.onEmojiCollected(msg.emoji, fromID, msg.fromName)
+            this.onEmojiCollected(msg.emoji, fromID, msg.fromName, true)
 
         }
 
@@ -304,7 +304,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
         await this.messages.send({ action: 'emojiswap:accept-swap', fromID, fromName, emoji: StateBridge.shared.state.myEmoji }, false, msgFromID)
 
         // Notify we collected their emoji
-        this.onEmojiCollected(msg.emoji, msgFromID, msg.fromName)
+        this.onEmojiCollected(msg.emoji, msgFromID, msg.fromName, false)
 
     }
 
@@ -319,7 +319,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
     }
 
     /** Called when we collect an emoji from another user */
-    async onEmojiCollected(emoji, fromID, fromName) {
+    async onEmojiCollected(emoji, fromID, fromName, isInitiator) {
 
         // Check if we already have an emoji from this user
         let isNewEmoji = !StateBridge.shared.state.collectedEmojis.find(e => e.emoji == emoji)
@@ -338,6 +338,15 @@ export default class PhotoBoothPlugin extends BasePlugin {
 
         // Send updated score to Vatom
         try {
+
+            // Send analytics event
+            if (isInitiator) this.user.sendAnalytics('com.vatom.emojiswap:emoji-swapped', { 
+                emoji, 
+                senderID: await this.user.getID(), 
+                senderName: await this.user.getDisplayName(),
+                recipientID: fromID, 
+                recipientName: fromName,
+            })
 
             // Stop if no campaign ID
             let campaignID = this.getField('campaign_id')
