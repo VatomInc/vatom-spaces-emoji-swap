@@ -339,14 +339,21 @@ export default class PhotoBoothPlugin extends BasePlugin {
         // Send updated score to Vatom
         try {
 
-            // Send analytics event
-            if (isInitiator) this.user.sendAnalytics('com.vatom.emojiswap:emoji-swapped', { 
-                emoji, 
-                senderID: await this.user.getID(), 
-                senderName: await this.user.getDisplayName(),
-                recipientID: fromID, 
-                recipientName: fromName,
-            })
+            // Check if we're the initiator
+            if (isInitiator) {
+
+                // Get sender ID for analytics
+                let senderID = await this.user.getID()
+                if (senderID.startsWith('vatominc:')) senderID = senderID.substring(9)
+
+                // Get recipient ID for analytics
+                let recipientID = fromID
+                if (recipientID.startsWith('vatominc:')) recipientID = recipientID.substring(9)
+
+                // Send analytics event
+                this.user.sendAnalytics('com.vatom.emojiswap:emoji-swapped', `${emoji}+${senderID}+${recipientID}`)
+
+            }
 
             // Stop if no campaign ID
             let campaignID = this.getField('campaign_id')
