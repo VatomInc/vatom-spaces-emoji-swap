@@ -1,15 +1,15 @@
 {
   "id": "com.vatom.emojiswap",
   "name": "Emoji Swap Game",
-  "version": "1.0.0",
-  "beta": true,
-  "pluginType": "Personal",
-  "description": "Allow users to play a game where they can swap and collect emojis.",
-  "longDescription": ".",
-  "configuration": ".",
+  "version": "0.0.1",
+  "beta": false,
+  "pluginType": "Business",
+  "description": "A fun emoji scavenger hunt and networking game!",
+  "longDescription": "You’ve been bestowed with the power of the emoji :star:️ – your passport to connection and camaraderie. Your mission? Seek out fellow adventurers, armed with their own unique emojis, and embark on an unforgettable journey of discovery! As guests network, meet new friends, exchange tales, and unravel shared interests, they’ll earn points toward a place on the leaderboard! From the mischievous :stuck_out_tongue_winking_eye: to the heartwarming :heart:, every emoji shared deepens your connection and widens your horizons. Get ready to unleash your inner emoji ambassador, and let the adventure of Emoji Trade paint your world with unforgettable connections! :rainbow:",
+  "configuration": "None",
   "category": "Fun",
-  "businessId": ".",
+  "businessId": "ym3t3mPi0g",
   "price": 0,
-  "releaseNotes": ".",
-  "entrypoint": ""
+  "releaseNotes": "Initial release",
+  "entrypoint": "https://plugins.vatom.com/ym3t3mPi0g/674d0f47208c8fa444a40fd3b87a0255/plugin.js"
 }
