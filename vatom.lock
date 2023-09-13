@@ -1,7 +1,7 @@
 {
   "id": "com.vatom.emojiswap",
   "name": "Emoji Swap Game",
-  "version": "1.0.2",
+  "version": "0.1.0",
   "beta": false,
   "pluginType": "Business",
   "description": "A fun emoji scavenger hunt and networking game!",
@@ -10,6 +10,6 @@
   "category": "Fun",
   "businessId": "ym3t3mPi0g",
   "price": 0,
-  "releaseNotes": "Update star emoji",
-  "entrypoint": "https://plugins.vatom.com/ym3t3mPi0g/4391001938b641c6fb2956819ca1ffd9/plugin.js"
+  "releaseNotes": "Initial publication",
+  "entrypoint": "https://plugins.vatom.com/ym3t3mPi0g/23f3064d8a12a833f7a6662d7c2de7c7/plugin.js"
 }
