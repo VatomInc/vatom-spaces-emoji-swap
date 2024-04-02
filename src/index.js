@@ -72,18 +72,22 @@ export default class PhotoBoothPlugin extends BasePlugin {
             myEmoji: '',
             collectedEmojis: [],
             score: 0,
-            leaderboard: []
+            leaderboard: [],
+            campaignID: this.getField('campaign_id') || '',
+            channel: this.getField('points_channel') || 'emojiswap',
         }
         
         // Update state
-        this.fetchEmojis()
-        this.fetchScore()
-        this.fetchLeaderboard()
+        this.onSettingsUpdated()
 
     }
 
-    /** Called when settings change */
+    /** Called when settings change and on first load */
     onSettingsUpdated() {
+
+        // Update state values
+        StateBridge.shared.state.campaignID = this.getField('campaign_id') || '',
+        StateBridge.shared.state.channel = this.getField('points_channel') || 'emojiswap',
 
         // Update state
         this.fetchEmojis()
@@ -135,7 +139,8 @@ export default class PhotoBoothPlugin extends BasePlugin {
 
             // Save it
             if (typeof score?.total != 'number') throw new Error('Returned points was not a number.')
-            StateBridge.shared.state.score = score.total
+            StateBridge.shared.state.score = score[channel] || 0
+            console.debug(`[Emoji Swap] Got score: channel=${channel} score=${score[channel] || 0}`)
 
         } catch (err) {
             console.warn(`[Emoji Swap] Failed to get score: ${err.message}`)
@@ -241,7 +246,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
     async onIncomingSwapRequest(msg, fromID) {
 
         // Check if we already have an emoji from this user
-        if (StateBridge.shared.state.collectedEmojis.find(e => e.fromID == fromID)) {
+        if (StateBridge.shared.state.collectedEmojis.find(e => e.fromID == fromID && e.campaignID == StateBridge.shared.state.campaignID && e.channel == StateBridge.shared.state.channel)) {
 
             // Send alert back
             await this.messages.send({ 
@@ -322,13 +327,15 @@ export default class PhotoBoothPlugin extends BasePlugin {
     async onEmojiCollected(emoji, fromID, fromName, isInitiator) {
 
         // Check if we already have an emoji from this user
-        let isNewEmoji = !StateBridge.shared.state.collectedEmojis.find(e => e.emoji == emoji)
+        let campaignID = this.getField('campaign_id')
+        let channel = this.getField('points_channel') || 'emojiswap'
+        let isNewEmoji = !StateBridge.shared.state.collectedEmojis.find(e => e.emoji == emoji && e.campaignID == campaignID && e.channel == channel)
         let addScore = isNewEmoji ? 10 : 1
-        if (StateBridge.shared.state.collectedEmojis.find(e => e.fromID == fromID)) 
+        if (StateBridge.shared.state.collectedEmojis.find(e => e.fromID == fromID && e.campaignID == campaignID && e.channel == channel)) 
             return
 
         // Add emoji to our list and update the score
-        StateBridge.shared.state.collectedEmojis.push({ emoji, fromID, fromName })
+        StateBridge.shared.state.collectedEmojis.push({ emoji, fromID, fromName, campaignID, channel })
         StateBridge.shared.state.score += addScore
         StateBridge.shared.updateState()
 
@@ -356,8 +363,6 @@ export default class PhotoBoothPlugin extends BasePlugin {
             }
 
             // Stop if no campaign ID
-            let campaignID = this.getField('campaign_id')
-            let channel = this.getField('points_channel') || 'emojiswap'
             if (!campaignID)
                 throw new Error("No campaign ID specified in the plugin settings.")
 
@@ -374,7 +379,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
 
             // Undo the score update
             StateBridge.shared.state.score -= addScore
-            StateBridge.shared.state.collectedEmojis = StateBridge.shared.state.collectedEmojis.filter(e => e.fromID != fromID)
+            StateBridge.shared.state.collectedEmojis = StateBridge.shared.state.collectedEmojis.filter(e => e.fromID != fromID && e.campaignID == campaignID && e.channel == channel)
             StateBridge.shared.updateState()
 
         }

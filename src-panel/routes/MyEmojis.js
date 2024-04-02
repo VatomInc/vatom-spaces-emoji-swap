@@ -16,6 +16,9 @@ export const MyEmojis = props => {
     let collectedEmojis = plugin.state.collectedEmojis || []
     collectedEmojis.sort((a, b) => a.date - b.date)
 
+    // Filter out emojis not in the current campaign and channel
+    collectedEmojis = collectedEmojis.filter(e => e.campaignID == plugin.state.campaignID && e.channel == plugin.state.channel)
+
     // Filter out duplicates in the emoji list
     let allEmojis = plugin.state.emojis || []
     allEmojis = allEmojis.filter((e, i) => allEmojis.indexOf(e) == i)
