@@ -48,6 +48,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
                     { id: 'info1', type: 'label', value: `The Emoji Swap game lets you swap and collect emojis with other users in the space.` },
                     { id: 'section-general', type: 'section', name: 'General' },
                     { id: 'emoji_list', name: 'Emojis', type: 'textarea', help: `The list of emojis to use in the game. You can specify an emoji multiple times to increase the chances of a user getting assigned to it.` },
+                    { id: 'emoji_blacklist', name: 'Emoji Integration', type: 'checkbox', default: false, help: `If enabled, the user will not be able to send emojis from the main Emoji plugin unless they have first received it from someone in the Emoji Swap game.` },
 
                     // Vatom connections
                     { id: 'section-vatom', type: 'section', name: 'Vatom' },
@@ -76,6 +77,9 @@ export default class PhotoBoothPlugin extends BasePlugin {
             campaignID: this.getField('campaign_id') || '',
             channel: this.getField('points_channel') || 'emojiswap',
         }
+
+        // Add hooks
+        this.hooks.addHandler('emoji.get-blacklist', () => this.onEmojiGetBlacklist())
         
         // Update state
         this.onSettingsUpdated()
@@ -389,6 +393,31 @@ export default class PhotoBoothPlugin extends BasePlugin {
 
         // Fix score in case it changes
         this.fetchScore()
+
+    }
+
+    /** When the main Emoji plugin activates, this is called to further filter the list of blacklisted emojis. */
+    onEmojiGetBlacklist() {
+
+        // Stop if not enabled
+        if (!this.getField('emoji_blacklist')) 
+            return null
+
+        // Get list of collected emojis for this campaign and channel
+        let collectedEmojis = StateBridge.shared.state.collectedEmojis || []
+        collectedEmojis = collectedEmojis.filter(e => e.campaignID == StateBridge.shared.state.campaignID && e.channel == StateBridge.shared.state.channel)
+
+        // Get all emojis we're using for the game
+        let emojis = StateBridge.shared.state.emojis || []
+
+        // Filter out duplicates in the emoji list
+        emojis = emojis.filter((e, i) => emojis.indexOf(e) == i)
+
+        // Filter out emojis that we have collected or that is our own emoji
+        emojis = emojis.filter(e => !collectedEmojis.find(c => c.emoji == e) && e != StateBridge.shared.state.myEmoji)
+
+        // This emoji list now contains all the emojis the user hasn't collected yet. Use it as the blacklist.
+        return emojis
 
     }
 
