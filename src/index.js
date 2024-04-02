@@ -79,7 +79,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
         }
 
         // Add hooks
-        this.hooks.addHandler('emoji.get-blacklist', () => this.onEmojiGetBlacklist())
+        this.hooks.addHandler('emoji.get-managed-list', () => this.onEmojiGetManagedList())
         
         // Update state
         this.onSettingsUpdated()
@@ -397,7 +397,7 @@ export default class PhotoBoothPlugin extends BasePlugin {
     }
 
     /** When the main Emoji plugin activates, this is called to further filter the list of blacklisted emojis. */
-    onEmojiGetBlacklist() {
+    onEmojiGetManagedList() {
 
         // Stop if not enabled
         if (!this.getField('emoji_blacklist')) 
@@ -417,7 +417,11 @@ export default class PhotoBoothPlugin extends BasePlugin {
         emojis = emojis.filter(e => !collectedEmojis.find(c => c.emoji == e) && e != StateBridge.shared.state.myEmoji)
 
         // This emoji list now contains all the emojis the user hasn't collected yet. Use it as the blacklist.
-        return emojis
+        return {
+            managedReason: `This Emoji is controlled by the Emoji Swap Game. Disable 'Emoji Integration' in the Emoji Swap Game settings to prevent this.`,
+            managedEmojis: StateBridge.shared.state.emojis || [],
+            blacklistedEmojis: emojis,
+        }
 
     }
 
