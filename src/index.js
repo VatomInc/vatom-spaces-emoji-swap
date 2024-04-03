@@ -343,6 +343,9 @@ export default class PhotoBoothPlugin extends BasePlugin {
         StateBridge.shared.state.score += addScore
         StateBridge.shared.updateState()
 
+        // Tell the Emoji plugin to refresh
+        this.hooks.trigger('emoji.refresh')
+
         // Show toast
         if (this.lastToastID) this.menus.closeToast(this.lastToastID)
         this.lastToastID = await this.menus.toast({ text: `You collected ${emoji} from <b>${fromName}</b>!`, duration: 5000 })
@@ -385,6 +388,9 @@ export default class PhotoBoothPlugin extends BasePlugin {
             StateBridge.shared.state.score -= addScore
             StateBridge.shared.state.collectedEmojis = StateBridge.shared.state.collectedEmojis.filter(e => e.fromID != fromID && e.campaignID == campaignID && e.channel == channel)
             StateBridge.shared.updateState()
+
+            // Tell the Emoji plugin to refresh
+            this.hooks.trigger('emoji.refresh')
 
         }
 
